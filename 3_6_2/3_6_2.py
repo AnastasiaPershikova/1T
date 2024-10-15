@@ -36,6 +36,6 @@ data =[((start_dt + timedelta(random.randint(0, (end_dt-start_dt).days))),
        round(random.uniform(50,120),2)) for i in range(1000)]
 orders = spark.createDataFrame(data, schema)
 
-orders.write.csv('orders.csv')
+orders.repartition(1).write.format('com.databricks.spark.csv').save("orders.csv",header = 'true')
 
 spark.stop()
