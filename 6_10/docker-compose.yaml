@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nancy89
+      POSTGRES_DB: popova
+    # ports:
+    #   - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d popova']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - service-net
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: 
+      - DB_USER=postgres
+      - DB_PASSWORD=nancy89
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=popova
+    networks:
+      - service-net
+
+volumes:
+  postgres_data:
+networks:
+  service-net:
